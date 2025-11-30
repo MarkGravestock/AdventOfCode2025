@@ -1,0 +1,11 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+/AdventOfCode2025.sln.DotSettings.user
+/.idea/.idea.AdventOfCode2025/.idea/.gitignore
+/.idea/.idea.AdventOfCode2025/.idea/aws.xml
+/.idea/.idea.AdventOfCode2025/.idea/encodings.xml
+/.idea/.idea.AdventOfCode2025/.idea/indexLayout.xml
+/.idea/.idea.AdventOfCode2025/.idea/vcs.xml
