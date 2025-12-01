@@ -2,7 +2,7 @@
 
 public class FileReader(string fileName)
 {
-    public static FileReader FromInput(string fileName) => new FileReader($@"./Input/{fileName}");
+    public static FileReader FromInput(string fileName) => new($@"./Input/{fileName}");
     
     public IEnumerable<string> Lines()
     {
