@@ -80,7 +80,7 @@ public class Day01Test
         [Fact]
         public void when_the_it_gets_a_rotation_it_calculates_the_password()
         {
-            var dial = new DialMethod434C49434B(startingAt: 50);
+            var dial = new DialPart2(startingAt: 50);
             dial.Rotate("L68");
             dial.Password().Should().Be(1);
             dial.Rotate("L30");
@@ -99,7 +99,7 @@ public class Day01Test
         {
             var lines = FileReader.FromInput("day1_test.txt").Lines();
 
-            var dial = new DialMethod434C49434B(startingAt: 50);
+            var dial = new DialPart2(startingAt: 50);
 
             foreach (var line in lines)
             {
@@ -112,7 +112,7 @@ public class Day01Test
         [Fact]
         public void it_deal_with_large_right_rotations()
         {
-            var dial = new DialMethod434C49434B(startingAt: 50);
+            var dial = new DialPart2(startingAt: 50);
             dial.Rotate("R1000").CurrentPosition().Should().Be(50);
             dial.Password().Should().Be(10);
         }
@@ -120,7 +120,7 @@ public class Day01Test
         [Fact]
         public void it_deal_with_large_left_rotations()
         {
-            var dial = new DialMethod434C49434B(startingAt: 25);
+            var dial = new DialPart2(startingAt: 25);
             dial.Rotate("L725").CurrentPosition().Should().Be(0);
             dial.Password().Should().Be(8);
         }
@@ -130,7 +130,7 @@ public class Day01Test
         {
             var lines = FileReader.FromInput("day1.txt").Lines();
 
-            var dial = new DialMethod434C49434B(startingAt: 50);
+            var dial = new DialPart2(startingAt: 50);
 
             foreach (var line in lines)
             {
@@ -142,7 +142,6 @@ public class Day01Test
     }
 
 }
-
 
 
 public class Dial
@@ -187,17 +186,17 @@ public class Dial
     }
 }
 
-public class DialMethod434C49434B
+public class DialPart2
 {
     private int currentPosition;
     private int password;
 
-    public DialMethod434C49434B(int startingAt)
+    public DialPart2(int startingAt)
     {
         currentPosition = startingAt;
     }
 
-    public DialMethod434C49434B Rotate(string rotation)
+    public DialPart2 Rotate(string rotation)
     {
         var clicks = int.Parse(rotation.Substring(1));
         var direction = rotation[0];
