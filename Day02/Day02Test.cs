@@ -10,7 +10,7 @@ public class Day02Test
         [Fact]
         public void it_can_split_a_range()
         {
-            var range = new ProductRange("11-22");
+            var range = new ProductIdRange("11-22");
             range.FirstId.Should().Be(11);
             range.LastId.Should().Be(22);
         }
@@ -18,7 +18,7 @@ public class Day02Test
         [Fact]
         public void it_can_find_invalid_single_values()
         {
-            var range = new ProductRange("11-22");
+            var range = new ProductIdRange("11-22");
             range.IsInvalid(22).Should().Be(true);
             range.IsInvalid(15).Should().Be(false);
         }
@@ -30,16 +30,15 @@ public class Day02Test
         [InlineData("1698522-1698528", new long[]{})]
         public void it_can_find_all_invalid_values(string productIdRange, long[] invalidIds)
         {
-            var range = new ProductRange(productIdRange);
+            var range = new ProductIdRange(productIdRange);
             range.InvalidIds.Should().Equal(invalidIds);
         }
         
         [Fact]
         public void it_can_find_the_total_of_invalid_ids()
         {
-            var lines = FileReader.FromInput("day2_test.txt").Lines().Select(line => line.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()).SelectMany(x => x);
-            var checksum = lines.Sum(line => new ProductRange(line).InvalidIds.Sum());
-            checksum.Should().Be(1227775554);
+            var sut = new InvalidProductIdTotaliser("day2_test.txt", false);
+            sut.TotalInvalidIds().Should().Be(1227775554);
         }
     }
 
@@ -48,22 +47,21 @@ public class Day02Test
         [Fact]
         public void it_can_find_the_total_of_invalid_ids()
         {
-            var lines = FileReader.FromInput("day2.txt").Lines()
-                .Select(line => line.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()).SelectMany(x => x);
-            long checksum = lines.Sum(line => new ProductRange(line).InvalidIds.Sum(x => (long)x));
-            checksum.Should().Be(40214376723L);
+            var sut = new InvalidProductIdTotaliser("day2.txt", false);
+            sut.TotalInvalidIds().Should().Be(40214376723L);
         }
     }
     
     public class Day02Part2
     {
-        [Fact]
-        public void it_can_find_invalid_single_values()
+        [Theory]
+        [InlineData(999, true)]
+        [InlineData(1000, false)]
+        [InlineData(1010, true)]
+        public void it_can_find_invalid_single_values(long productId, bool isInvalid)
         {
-            var range = new ProductRangePart2("998-1012");
-            range.IsInvalid(999).Should().Be(true);
-            range.IsInvalid(1000).Should().Be(false);
-            range.IsInvalid(1010).Should().Be(true);
+            var range = new ProductIdRangePart2("998-1012");
+            range.IsInvalid(productId).Should().Be(isInvalid);
         }
         
         [Theory]
@@ -77,35 +75,42 @@ public class Day02Test
         [InlineData("2121212118-2121212124", new long[]{2121212121L})]
         public void it_can_find_all_invalid_values(string productIdRange, long[] invalidIds)
         {
-            var range = new ProductRangePart2(productIdRange);
+            var range = new ProductIdRangePart2(productIdRange);
             range.InvalidIds.Should().Equal(invalidIds);
         }
 
         [Fact]
         public void it_can_find_the_total_of_the_example_invalid_ids()
         {
-            var lines = FileReader.FromInput("day2_test.txt").Lines().Select(line => line.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()).SelectMany(x => x);
-            var checksum = lines.Sum(line => new ProductRangePart2(line).InvalidIds.Sum());
-            checksum.Should().Be(4174379265L);
+            var sut = new InvalidProductIdTotaliser("day2_test.txt", true);
+            sut.TotalInvalidIds().Should().Be(4174379265L);
         }
         
         [Fact]
         public void it_can_find_the_total_of_invalid_ids()
         {
-            var lines = FileReader.FromInput("day2.txt").Lines()
-                .Select(line => line.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()).SelectMany(x => x);
-            long checksum = lines.Sum(line => new ProductRangePart2(line).InvalidIds.Sum(x => (long)x));
-            checksum.Should().Be(50793864718L);
+            var sut = new InvalidProductIdTotaliser("day2.txt", true);
+            sut.TotalInvalidIds().Should().Be(50793864718L);
         }
     }
 }
 
-public class ProductRangePart2 : ProductRangeBase
+public class InvalidProductIdTotaliser(string productIdRangefileName, bool part2)
 {
-    public ProductRangePart2(string productIdRange) : base(productIdRange)
+    public long TotalInvalidIds()
     {
+        var lines = FileReader.FromInput(productIdRangefileName).Lines()
+            .Select(line => line.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()).SelectMany(x => x);
+        return lines.Sum(line =>
+        {
+            ProductIdRangeBase range = part2 ? new ProductIdRangePart2(line) : new ProductIdRange(line);
+            return range.InvalidIds.Sum(x => x);
+        });
     }
+}
 
+public class ProductIdRangePart2(string productIdRange) : ProductIdRangeBase(productIdRange)
+{
     public override bool IsInvalid(long id)
     {
         var idString = id.ToString();
@@ -122,9 +127,9 @@ public class ProductRangePart2 : ProductRangeBase
     }
 }
 
-public abstract class ProductRangeBase
+public abstract class ProductIdRangeBase
 {
-    public ProductRangeBase(string productIdRange)
+    protected ProductIdRangeBase(string productIdRange)
     {
         var items = productIdRange.Split('-');
 
@@ -140,12 +145,8 @@ public abstract class ProductRangeBase
     public abstract bool IsInvalid(long id);
 }
 
-public class ProductRange : ProductRangeBase
+public class ProductIdRange(string productIdRange) : ProductIdRangeBase(productIdRange)
 {
-    public ProductRange(string productIdRange) : base(productIdRange)
-    {
-    }
-
     public override bool IsInvalid(long id)
     {
         var idString = id.ToString();
