@@ -162,7 +162,7 @@ public class Dial
         if (direction == 'L')
         {
             currentPosition -= clicks % 100;
-            if (currentPosition < 0) currentPosition = 100 + currentPosition;
+            if (currentPosition < 0) currentPosition += 100;
         }
         else
         {
