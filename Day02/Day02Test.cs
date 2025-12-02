@@ -139,7 +139,7 @@ public abstract class ProductIdRangeBase
         LastId = long.Parse(items[1]);
     }
 
-    public List<long> InvalidIds => RangeExtensions.Through((long)FirstId, LastId).Where(IsInvalid).ToList();
+    public List<long> InvalidIds => FirstId.Through(LastId).Where(IsInvalid).ToList();
     public long FirstId { get; }
     public long LastId { get; }
     public abstract bool IsInvalid(long id);
