@@ -143,38 +143,23 @@ public class Day01Test
 
 }
 
-
-public class Dial
+public abstract class DialBase(int startingAt)
 {
-    private int currentPosition;
-    private int password;
+    protected int currentPosition = startingAt;
+    protected int password;
 
-    public Dial(int startingAt)
-    {
-        currentPosition = startingAt;
-    }
-
-    public Dial Rotate(string rotation)
+    public DialBase Rotate(string rotation)
     {
         var clicks = int.Parse(rotation.Substring(1));
         var direction = rotation[0];
         
-        if (direction == 'L')
-        {
-            currentPosition -= clicks % 100;
-            if (currentPosition < 0) currentPosition += 100;
-        }
-        else
-        {
-            currentPosition += clicks % 100;
-            if (currentPosition >= 100) currentPosition -= 100;
-        }
-        
-        if (currentPosition == 0) password++;
-        
+        UpdateDialSate(direction, clicks);
+
         return this;
     }
-    
+
+    protected abstract void UpdateDialSate(char direction, int clicks);
+
     public int CurrentPosition()
     {
         return currentPosition;
@@ -186,20 +171,29 @@ public class Dial
     }
 }
 
-public class DialPart2
+public class Dial(int startingAt) : DialBase(startingAt)
 {
-    private int currentPosition;
-    private int password;
-
-    public DialPart2(int startingAt)
+    protected override void UpdateDialSate(char direction, int clicks)
     {
-        currentPosition = startingAt;
+        if (direction == 'L')
+        {
+            currentPosition -= clicks % 100;
+            if (currentPosition < 0) currentPosition += 100;
+        }
+        else
+        {
+            currentPosition += clicks % 100;
+            if (currentPosition >= 100) currentPosition -= 100;
+        }
+
+        if (currentPosition == 0) password++;
     }
+}
 
-    public DialPart2 Rotate(string rotation)
+public class DialPart2(int startingAt) : DialBase(startingAt)
+{
+    protected override void UpdateDialSate(char direction, int clicks)
     {
-        var clicks = int.Parse(rotation.Substring(1));
-        var direction = rotation[0];
         int numberOfPasses = clicks / 100;
         
         if (direction == 'L')
@@ -225,17 +219,5 @@ public class DialPart2
         password += numberOfPasses;
         
         if (currentPosition == 0) password++;
-        
-        return this;
-    }
-    
-    public int CurrentPosition()
-    {
-        return currentPosition;
-    }
-
-    public int Password()
-    {
-        return password;
     }
 }
