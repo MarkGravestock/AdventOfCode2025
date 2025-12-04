@@ -56,24 +56,9 @@ public class Day04Test
         [Fact]
         public void it_finds_total_accessable_rolls_after_removals()
         {
-            var lines = FileReader.FromInput("day4_test.txt").Lines().ToList();
-            var totalRolls = 0;
-            var continueLoop = true;
+            var sut  = new IterativePaperRollGrid(FileReader.FromInput("day4_test.txt").Lines().ToList());
             
-            do
-            {
-                var sut = new PaperRollGrid(lines);
-
-                var results = sut.FindAccessibleRolls();
-
-                continueLoop = results.accessibleRollsCount > 0;
-
-                lines = results.resultingRolls;
-                totalRolls += results.accessibleRollsCount;
-                
-            } while (continueLoop);
-            
-            totalRolls.Should().Be(43);
+            sut.FindAccessibleRollsIteratively().Should().Be(43);
         }
     }
 
@@ -90,31 +75,41 @@ public class Day04Test
     public class Day04Part2
     {
         [Fact]
-        public void it_finds_total_accessable_rolls_after_removals()
+        public void it_finds_total_accessible_rolls_after_removals()
         {
-            var lines = FileReader.FromInput("day4.txt").Lines().ToList();
-
-            var totalRolls = 0;
-            var continueLoop = true;
+            var sut  = new IterativePaperRollGrid(FileReader.FromInput("day4.txt").Lines().ToList());
             
-            do
-            {
-                var sut = new PaperRollGrid(lines);
-
-                var results = sut.FindAccessibleRolls();
-
-                continueLoop = results.accessibleRollsCount > 0;
-
-                lines = results.resultingRolls;
-                totalRolls += results.accessibleRollsCount;
-                
-            } while (continueLoop);
-            
-            totalRolls.Should().Be(9038);
+            sut.FindAccessibleRollsIteratively().Should().Be(9038);
         }
     }
 
 }
+
+public class IterativePaperRollGrid(List<string> inputLines)
+{
+    public int FindAccessibleRollsIteratively()
+    {
+        var lines = inputLines;
+        var totalRolls = 0;
+        var continueLoop = true;
+            
+        do
+        {
+            var sut = new PaperRollGrid(lines);
+
+            var results = sut.FindAccessibleRolls();
+
+            continueLoop = results.AccessibleRollsCount > 0;
+
+            lines = results.ResultingRolls;
+            totalRolls += results.AccessibleRollsCount;
+                
+        } while (continueLoop);
+        
+        return totalRolls;
+    }
+}
+
 
 public class PaperRollGrid(List<string> inputLines)
 {
@@ -157,7 +152,7 @@ public class PaperRollGrid(List<string> inputLines)
 
     public int TotalAccessibleRolls()
     {
-        return FindAccessibleRolls().accessibleRollsCount;
+        return FindAccessibleRolls().AccessibleRollsCount;
     }
 
     public Results FindAccessibleRolls()
@@ -190,4 +185,4 @@ public class PaperRollGrid(List<string> inputLines)
 }
 
 public record Bounds(Range Height, Range Width);
-public record Results(List<string> resultingRolls, int accessibleRollsCount);
+public record Results(List<string> ResultingRolls, int AccessibleRollsCount);
