@@ -64,6 +64,16 @@ public class Day04Test
         }
     }
 
+    public class Day04Part2
+    {
+        [Fact]
+        public void it_finds_total_accessable_rolls()
+        {
+            var sut = new PaperRollGrid("day4.txt");
+            sut.TotalAccessibleRolls().Should().Be(1543);
+        }
+    }
+
 }
 
 public class PaperRollGrid(string fileName)
@@ -106,6 +116,8 @@ public class PaperRollGrid(string fileName)
 
     public int TotalAccessibleRolls()
     {
+        var resultingRolls = inputLines.Select(x => x).ToList();
+        
         int accessibleRollCount = 0;
         
         for (int lines = Bounds().Height.Start.Value; lines <= Bounds().Height.End.Value; lines++)
@@ -115,12 +127,19 @@ public class PaperRollGrid(string fileName)
                 if (ReadAt(lines, columms) == "@" && IsRollAccessableAt(lines, columms))
                 {
                     accessibleRollCount++;
-                    Console.WriteLine("Accessible Line: {0}, Column: {1}", lines, columms);
+                    ReplaceAt(resultingRolls, lines, columms, ".");
                 }
             }
         }
         
         return accessibleRollCount;
+    }
+
+    private void ReplaceAt(List<string> resultingRolls, int lines, int columms, string replacement)
+    {
+        var chars = inputLines[lines].ToCharArray();
+        chars[columms] = replacement[0];
+        resultingRolls[lines] = new string(chars);
     }
 }
 
