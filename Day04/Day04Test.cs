@@ -52,6 +52,29 @@ public class Day04Test
         {
             sut.TotalAccessibleRolls().Should().Be(13);
         }
+        
+        [Fact]
+        public void it_finds_total_accessable_rolls_after_removals()
+        {
+            var lines = FileReader.FromInput("day4_test.txt").Lines().ToList();
+            var totalRolls = 0;
+            var continueLoop = true;
+            
+            do
+            {
+                var sut = new PaperRollGrid(lines);
+
+                var results = sut.FindAccessibleRolls();
+
+                continueLoop = results.accessibleRollsCount > 0;
+
+                lines = results.resultingRolls;
+                totalRolls += results.accessibleRollsCount;
+                
+            } while (continueLoop);
+            
+            totalRolls.Should().Be(43);
+        }
     }
 
     public class Day04Part1
@@ -67,19 +90,37 @@ public class Day04Test
     public class Day04Part2
     {
         [Fact]
-        public void it_finds_total_accessable_rolls()
+        public void it_finds_total_accessable_rolls_after_removals()
         {
-            var sut = new PaperRollGrid("day4.txt");
-            sut.TotalAccessibleRolls().Should().Be(1543);
+            var lines = FileReader.FromInput("day4.txt").Lines().ToList();
+
+            var totalRolls = 0;
+            var continueLoop = true;
+            
+            do
+            {
+                var sut = new PaperRollGrid(lines);
+
+                var results = sut.FindAccessibleRolls();
+
+                continueLoop = results.accessibleRollsCount > 0;
+
+                lines = results.resultingRolls;
+                totalRolls += results.accessibleRollsCount;
+                
+            } while (continueLoop);
+            
+            totalRolls.Should().Be(9038);
         }
     }
 
 }
 
-public class PaperRollGrid(string fileName)
+public class PaperRollGrid(List<string> inputLines)
 {
-    private readonly List<string> inputLines = FileReader.FromInput(fileName).Lines().ToList();
-
+    public PaperRollGrid(string fileName) : this(FileReader.FromInput(fileName).Lines().ToList())
+    {
+    }
 
     public Bounds Bounds()
     {
@@ -116,6 +157,11 @@ public class PaperRollGrid(string fileName)
 
     public int TotalAccessibleRolls()
     {
+        return FindAccessibleRolls().accessibleRollsCount;
+    }
+
+    public Results FindAccessibleRolls()
+    {
         var resultingRolls = inputLines.Select(x => x).ToList();
         
         int accessibleRollCount = 0;
@@ -132,15 +178,16 @@ public class PaperRollGrid(string fileName)
             }
         }
         
-        return accessibleRollCount;
+        return new Results(resultingRolls, accessibleRollCount);
     }
-
+    
     private void ReplaceAt(List<string> resultingRolls, int lines, int columms, string replacement)
     {
-        var chars = inputLines[lines].ToCharArray();
+        var chars = resultingRolls[lines].ToCharArray();
         chars[columms] = replacement[0];
         resultingRolls[lines] = new string(chars);
     }
 }
 
 public record Bounds(Range Height, Range Width);
+public record Results(List<string> resultingRolls, int accessibleRollsCount);
