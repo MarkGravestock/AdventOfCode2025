@@ -14,4 +14,9 @@ public static class RangeExtensions
             yield return i;
         }
     }
+
+    public static bool Contains(this Range range, int value)
+    {
+        return range.Start.Value <= value && value <= range.End.Value;
+    }
 }
