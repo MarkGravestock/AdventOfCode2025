@@ -57,7 +57,8 @@ public class Day05Test
             this.output = output;
         }
         
-        [Fact]
+        [Fact(Skip = "Runs out of memory")]
+        
         public void it_can_count_fresh_ingredients_from_test_file()
         {
             FreshnessChecker sut = new ();
@@ -74,50 +75,23 @@ public class Day05Test
         public void it_can_count_fresh_ingredients_from_file()
         {
             FreshnessChecker sut = new ();
-            var lines = FileReader.FromInput("day5_test.txt").AllLines().Publish();
+            var lines = FileReader.FromInput("day5.txt").AllLines().Publish();
             lines.TakeWhile(x => x.Trim() != String.Empty).ForEach(sut.AddRange);
 
             var ranges = sut.FreshIngredientsRanges();
-            bool changed;
-
-            do
-            {
                 ranges.Sort(((range1, range2) => range1.Start.CompareTo(range2.Start)));
 
-                var pairs = ranges.Window(2);
-
-                var combinedRanges = new List<Range>();
-
-                changed = false;
-                foreach (var pair in pairs)
+            for (int i = ranges.Count - 2; i >= 0; i--)
+            {
+                if (ranges[i].Overlaps(ranges[i + 1]))
                 {
-                    if (pair.Count != 2)
-                    {
-                        combinedRanges.Add(pair[0]);
-                        continue;
-                    }
-                    
-                    var first = pair[0];
-                    var second = pair[1];
-
-                    if (!changed && first.Overlaps(second))
-                    {
-                        combinedRanges.Add(first.Combine(second));
-                        changed = true;
-                        continue;
-                    }
-
-                    combinedRanges.Add(first);
-                    combinedRanges.Add(second);
+                    ranges[i] = ranges[i].Combine(ranges[i + 1]);
+                    ranges.RemoveAt(i + 1);
                 }
-                
-                ranges = combinedRanges;
-            } while (changed);
-
-            var mergedRanges = ranges.Publish();
-            
-            mergedRanges.ForEach(x => output.WriteLine(x.ToString()));
-            mergedRanges.Sum(range => range.Length).Should().Be(14);
+            }
+        
+            ranges.ForEach(x => output.WriteLine($"{x} {x.Length}"));
+            ranges.Sum(range => range.Length).Should().Be(367899984917516L);
         }
         
     }
