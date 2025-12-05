@@ -1,5 +1,4 @@
-﻿using System.Text.Unicode;
-using FluentAssertions;
+﻿using FluentAssertions;
 using MarkGravestock.AdventOfCode2025.Common;
 using Xunit.Abstractions;
 
@@ -57,8 +56,7 @@ public class Day05Test
             this.output = output;
         }
         
-        [Fact(Skip = "Runs out of memory")]
-        
+        [Fact]
         public void it_can_count_fresh_ingredients_from_test_file()
         {
             FreshnessChecker sut = new ();
