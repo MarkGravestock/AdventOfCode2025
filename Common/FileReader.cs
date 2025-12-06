@@ -12,9 +12,7 @@ public class FileReader(string fileName)
     
     public IEnumerable<string> AllLines()
     {
-        using var sr = new StreamReader(fileName);
-        var text = sr.ReadToEnd();
-        return text.Split("\n").ToList();
+        return File.ReadLines(fileName);
     }
 
 }

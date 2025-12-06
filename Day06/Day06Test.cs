@@ -113,7 +113,7 @@ public class Day06Test
         [Fact]
         public void it_can_load_and_solve_example_problems()
         {
-            var lines = FileReader.FromInput("day6_test.txt").AllLines().Select(x => x[..^1]).ToArray();
+            var lines = FileReader.FromInput("day6_test.txt").AllLines().ToArray();
             
             var operators = lines[^1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
@@ -162,7 +162,7 @@ public class Day06Test
         [Fact]
         public void it_can_load_and_solve_real_problems()
         {
-            var lines = FileReader.FromInput("day6.txt").AllLines().Select(x => x[..^1]).ToArray();
+            var lines = FileReader.FromInput("day6.txt").AllLines().ToArray();
             
             var operators = lines[^1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
