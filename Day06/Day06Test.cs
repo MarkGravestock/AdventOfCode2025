@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Text;
+using FluentAssertions;
 using MarkGravestock.AdventOfCode2025.Common;
 using Xunit.Abstractions;
 
@@ -112,42 +113,97 @@ public class Day06Test
         [Fact]
         public void it_can_load_and_solve_example_problems()
         {
-            var lines = FileReader.FromInput("day6_test.txt").AllLines().Select(x => x.Trim()).ToArray();
+            var lines = FileReader.FromInput("day6_test.txt").AllLines().Select(x => x[..^1]).ToArray();
             
             var operators = lines[^1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
-            operators.Should().HaveCount(4);
-
-            var firstOperandsLength = lines[0].Split(" ", StringSplitOptions.RemoveEmptyEntries).Length;
+            var firstLineLength = lines[0].Length;
+            var problem = 0;
+            var totals = new long[operators.Length];
             
-            firstOperandsLength.Should().Be(4);
-
-            var operands = new long[lines.Length - 1, firstOperandsLength];
-            var totals = new long[firstOperandsLength];
-            
-            for (int i = 0; i <= lines.Length - 2; i++)
+            for (int column = 0; column < firstLineLength; column++)
             {
-                var lineOperands = lines[i].Split(" ", StringSplitOptions.RemoveEmptyEntries);
-
-                for (int j = 0; j < lineOperands.Length; j++)
+                var total = 0;
+                
+                StringBuilder sb = new();
+                for (int row = 0; row <= lines.Length - 2; row++)
                 {
-                    operands[i, j] = long.Parse(lineOperands[j]);
+                    sb.Append(lines[row][column]);
+                }
 
-                    if (operators[j] == "+")
-                    {
-                        totals[j] += operands[i, j];
-                    }
-                    else if (operators[j] == "*")
-                    {
-                        if (i == 0) totals[j] = 1;
-                        totals[j] *= operands[i, j];
-                    }
-                    else
-                    {
-                        throw new Exception("Unknown operator");
-                    }
+                var value = sb.ToString().Trim();
+
+                if (value == "")
+                {
+                    problem++;
+                    continue;
+                }
+
+                var operand = long.Parse(value);
+                    
+                if (operators[problem] == "+")
+                {
+                    totals[problem] += operand;
+                }
+                else if (operators[problem] == "*")
+                {
+                    if (totals[problem] == 0) totals[problem] = 1;
+                    totals[problem] *= operand;
+                }
+                else
+                {
+                    throw new Exception("Unknown operator");
                 }
             }
+            totals.Sum().Should().Be(3263827);
+        }
+        
+        [Fact]
+        public void it_can_load_and_solve_real_problems()
+        {
+            var lines = FileReader.FromInput("day6.txt").AllLines().Select(x => x[..^1]).ToArray();
+            
+            var operators = lines[^1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+            var firstLineLength = lines[0].Length;
+            var problem = 0;
+            var totals = new long[operators.Length];
+            
+            for (int column = 0; column < firstLineLength; column++)
+            {
+                var total = 0;
+                
+                StringBuilder sb = new();
+                for (int row = 0; row <= lines.Length - 2; row++)
+                {
+                    sb.Append(lines[row][column]);
+                }
+
+                var value = sb.ToString().Trim();
+
+                if (value == "")
+                {
+                    problem++;
+                    continue;
+                }
+
+                var operand = long.Parse(value);
+                    
+                if (operators[problem] == "+")
+                {
+                    totals[problem] += operand;
+                }
+                else if (operators[problem] == "*")
+                {
+                    if (totals[problem] == 0) totals[problem] = 1;
+                    totals[problem] *= operand;
+                }
+                else
+                {
+                    throw new Exception("Unknown operator");
+                }
+            }
+            totals.Sum().Should().Be(11744693538946L);
         }
     }
 }
