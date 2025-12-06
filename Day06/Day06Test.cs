@@ -123,8 +123,6 @@ public class Day06Test
             
             for (int column = 0; column < firstLineLength; column++)
             {
-                var total = 0;
-                
                 StringBuilder sb = new();
                 for (int row = 0; row <= lines.Length - 2; row++)
                 {
@@ -155,6 +153,9 @@ public class Day06Test
                     throw new Exception("Unknown operator");
                 }
             }
+            
+            output.WriteLine($"Totals {string.Join(" ", totals)}");
+            
             totals.Sum().Should().Be(3263827);
         }
         
@@ -171,8 +172,6 @@ public class Day06Test
             
             for (int column = 0; column < firstLineLength; column++)
             {
-                var total = 0;
-                
                 StringBuilder sb = new();
                 for (int row = 0; row <= lines.Length - 2; row++)
                 {
