@@ -11,7 +11,7 @@ public class Day06Test
         private readonly Object sut = new ();
 
         [Fact]
-        public void it_can_load_problems()
+        public void it_can_load_and_solve_problems()
         {
             var lines = FileReader.FromInput("day6_test.txt").AllLines().Select(x => x.Trim()).ToArray();
             
@@ -57,7 +57,7 @@ public class Day06Test
     public class Day06Part1
     {
         [Fact]
-        public void it_can_check_add_ranges_from_file()
+        public void it_can_load_and_solve_problems()
         {
             var lines = FileReader.FromInput("day6.txt").AllLines().Select(x => x.Trim()).ToArray();
             
@@ -110,13 +110,44 @@ public class Day06Test
         }
         
         [Fact]
-        public void it_can_count_fresh_ingredients_from_test_file()
+        public void it_can_load_and_solve_example_problems()
         {
-            var sut = "hi";
-            var lines = FileReader.FromInput("day5_test.txt").AllLines().Publish();
-            //lines.TakeWhile(x => x.Trim() != String.Empty).ForEach(sut.AddRange);
+            var lines = FileReader.FromInput("day6_test.txt").AllLines().Select(x => x.Trim()).ToArray();
+            
+            var operators = lines[^1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
-            sut.Should().Be("hi");
+            operators.Should().HaveCount(4);
+
+            var firstOperandsLength = lines[0].Split(" ", StringSplitOptions.RemoveEmptyEntries).Length;
+            
+            firstOperandsLength.Should().Be(4);
+
+            var operands = new long[lines.Length - 1, firstOperandsLength];
+            var totals = new long[firstOperandsLength];
+            
+            for (int i = 0; i <= lines.Length - 2; i++)
+            {
+                var lineOperands = lines[i].Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+                for (int j = 0; j < lineOperands.Length; j++)
+                {
+                    operands[i, j] = long.Parse(lineOperands[j]);
+
+                    if (operators[j] == "+")
+                    {
+                        totals[j] += operands[i, j];
+                    }
+                    else if (operators[j] == "*")
+                    {
+                        if (i == 0) totals[j] = 1;
+                        totals[j] *= operands[i, j];
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown operator");
+                    }
+                }
+            }
         }
     }
 }
