@@ -172,13 +172,13 @@ public class Day06Test
             
             for (int column = 0; column < firstLineLength; column++)
             {
-                StringBuilder sb = new();
+                StringBuilder number = new();
                 for (int row = 0; row <= lines.Length - 2; row++)
                 {
-                    sb.Append(lines[row][column]);
+                    number.Append(lines[row][column]);
                 }
 
-                var value = sb.ToString().Trim();
+                var value = number.ToString().Trim();
 
                 if (value == "")
                 {
