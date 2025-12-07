@@ -16,7 +16,7 @@ public class Day067Test
         private readonly TachyonManifold sut;
 
         [Fact]
-        public void it_can_read_the_bounds_of_the_daigram()
+        public void it_can_read_the_bounds_of_the_diagram()
         {
             sut.Bounds().Height.Start.Value.Should().Be(0);
             sut.Bounds().Height.End.Value.Should().Be(7);
@@ -45,7 +45,7 @@ public class Day067Test
         [Fact]
         public void it_signals_if_beam_leaves_manifold()
         {
-            sut.FindNextSplitterFrom(new Location(0, 0)).Should().Be(Location.Exited());
+            sut.FindNextSplitterFrom(new Location(0, 0)).Should().Be(Location.ExitedManifold());
         }
 
 
@@ -168,7 +168,7 @@ internal class TachyonManifold(List<string> inputLines)
             currentLocation = currentLocation.MoveNext();
         }
         
-        return ReadCurrent(currentLocation) == "^" ? currentLocation : Location.Exited();
+        return ReadCurrent(currentLocation) == "^" ? currentLocation : Location.ExitedManifold();
     }
 
     private string ReadCurrent(Location currentLocation)
@@ -190,21 +190,21 @@ internal class TachyonManifold(List<string> inputLines)
     {
         var startTime = DateTime.Now;
         
-        var splitterCounts = new Dictionary<Splitter, long>();
-        var firstSplitter = new Splitter(FindNextSplitterFrom(FindStart()));
+        var visitedSplitterCounts = new Dictionary<Splitter, long>();
+        var startSplitter = new Splitter(FindNextSplitterFrom(FindStart()));
 
-        var timelines =  CountTimelines(splitterCounts, firstSplitter);
+        var timelines =  CountTimelines(visitedSplitterCounts, startSplitter);
         OutputDiagram(0, timelines, startTime);
         return timelines;
     }
 
-    private long CountTimelines(Dictionary<Splitter, long> splitterCounts,  Splitter firstSplitter)
+    private long CountTimelines(Dictionary<Splitter, long> splitterCounts,  Splitter currentSplitter)
     {
-        if (splitterCounts.TryGetValue(firstSplitter, out var timelines)) return timelines;
+        if (splitterCounts.TryGetValue(currentSplitter, out var timelines)) return timelines;
         
-        var nextSplitter = FindNextSplitter(firstSplitter);
+        var nextSplitter = FindNextSplitter(currentSplitter);
         
-        if (nextSplitter.Location == Location.Exited()) return splitterCounts[firstSplitter] = 1;
+        if (nextSplitter.Location == Location.ExitedManifold()) return splitterCounts[currentSplitter] = 1;
         
         var childCount = nextSplitter.Splits().Sum(split => CountTimelines(splitterCounts, new Splitter(FindNextSplitterFrom(split))));
         
@@ -218,7 +218,7 @@ internal class TachyonManifold(List<string> inputLines)
         Location currentBeam = FindStart();
         
         HashSet<Location> splitsStillToTrace = new();
-        splitsStillToTrace.Add(Location.Exited());
+        splitsStillToTrace.Add(Location.ExitedManifold());
         var startTime = DateTime.Now;
         var timelines = 0;
         
@@ -230,7 +230,7 @@ internal class TachyonManifold(List<string> inputLines)
             
             var beamToSplit = FindNextSplitterFrom(currentBeam);
 
-            if (beamToSplit == Location.Exited())
+            if (beamToSplit == Location.ExitedManifold())
             {
                 
                 if (splitsStillToTrace.Count == 0)
@@ -281,7 +281,7 @@ internal class TachyonManifold(List<string> inputLines)
             var beamToSplit = FindNextSplitterFrom(currentBeam);
             beams.Remove(currentBeam);
             
-            if (beamToSplit == Location.Exited()) continue;
+            if (beamToSplit == Location.ExitedManifold()) continue;
             
             splitLocations.Add(beamToSplit);
             
@@ -321,7 +321,7 @@ internal record Location(Index Line, Index Column)
         return this with { Line = Line.Value + 1 };
     }
 
-    public static Location Exited()
+    public static Location ExitedManifold()
     {
         return new Location(int.MaxValue, int.MaxValue);
     }
