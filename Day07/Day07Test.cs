@@ -153,7 +153,7 @@ internal class TachyonManifold(List<string> inputLines)
         return new Location(0, inputLines[0].IndexOf("S", StringComparison.Ordinal));
     }
 
-    public Splitter FindNextSplitter(Splitter lastSplitter)
+    private Splitter FindNextSplitter(Splitter lastSplitter)
     {
         return new Splitter(FindNextSplitterFrom(lastSplitter.Location));
     }
@@ -165,7 +165,7 @@ internal class TachyonManifold(List<string> inputLines)
         while (ReadCurrent(currentLocation) != "^" && ReadCurrent(currentLocation) != "X")
         {
             WriteAt(currentLocation.Line.Value, currentLocation.Column.Value, "|");
-            currentLocation = currentLocation.MoveNext();
+            currentLocation = currentLocation.MoveDown();
         }
         
         return ReadCurrent(currentLocation) == "^" ? currentLocation : Location.ExitedManifold();
@@ -316,7 +316,7 @@ internal class TachyonManifold(List<string> inputLines)
 
 internal record Location(Index Line, Index Column)
 {
-    internal Location MoveNext()
+    internal Location MoveDown()
     {
         return this with { Line = Line.Value + 1 };
     }
