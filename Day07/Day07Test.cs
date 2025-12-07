@@ -188,27 +188,28 @@ internal class TachyonManifold(List<string> inputLines)
 
     public long SimulateQuantumBeamsOptimised()
     {
+        var startTime = DateTime.Now;
+        
         var splitterCounts = new Dictionary<Splitter, long>();
         var firstSplitter = new Splitter(FindNextSplitterFrom(FindStart()));
 
-        return CountTimelines(splitterCounts, firstSplitter);
+        var timelines =  CountTimelines(splitterCounts, firstSplitter);
+        OutputDiagram(0, timelines, startTime);
+        return timelines;
     }
 
     private long CountTimelines(Dictionary<Splitter, long> splitterCounts,  Splitter firstSplitter)
     {
-        if (splitterCounts.ContainsKey(firstSplitter)) return splitterCounts[firstSplitter];
+        if (splitterCounts.TryGetValue(firstSplitter, out var timelines)) return timelines;
         
         var nextSplitter = FindNextSplitter(firstSplitter);
         
         if (nextSplitter.Location == Location.Exited()) return splitterCounts[firstSplitter] = 1;
-
-        long childCount = 0;
-        foreach (var split in  nextSplitter.Splits())
-        {
-            childCount += CountTimelines(splitterCounts, new Splitter(FindNextSplitterFrom(split)));
-        }
+        
+        var childCount = nextSplitter.Splits().Sum(split => CountTimelines(splitterCounts, new Splitter(FindNextSplitterFrom(split))));
         
         splitterCounts[nextSplitter] = childCount;
+
         return childCount;
     }
 
@@ -250,11 +251,12 @@ internal class TachyonManifold(List<string> inputLines)
             splitsStillToTrace.Add(splitBeams.Last());
         }
         
+        OutputDiagram(iteration, timelines, startTime);
         
         return timelines;
     }
 
-    private void OutputDiagram(int iteration, int timelines, DateTime startTime)
+    private void OutputDiagram(int iteration, long timelines, DateTime startTime)
     {
         OutputDiagram(iteration, 0, timelines, startTime);
     }
@@ -298,7 +300,7 @@ internal class TachyonManifold(List<string> inputLines)
         return splitLocations.Count;
     }
 
-    private void OutputDiagram(int iteration, int splitLocationsCount, int beamsCount, DateTime startTime)
+    private void OutputDiagram(int iteration, int splitLocationsCount, long beamsCount, DateTime startTime)
     {
         var elapsedTime = DateTime.Now - startTime;
         var message =
