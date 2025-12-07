@@ -19,7 +19,7 @@ public class Day067Test
         public void it_can_read_the_bounds_of_the_daigram()
         {
             sut.Bounds().Height.Start.Value.Should().Be(0);
-            sut.Bounds().Height.End.Value.Should().Be(15);
+            sut.Bounds().Height.End.Value.Should().Be(7);
             sut.Bounds().Width.Start.Value.Should().Be(0);
             sut.Bounds().Width.End.Value.Should().Be(14);
         }
@@ -39,7 +39,7 @@ public class Day067Test
         [Fact]
         public void it_can_find_the_first_splitter()
         {
-            sut.FindNextSplitterFrom(sut.FindStart()).Should().Be(new Location(2, 7));
+            sut.FindNextSplitterFrom(sut.FindStart()).Should().Be(new Location(1, 7));
         }
 
         [Fact]
@@ -53,7 +53,7 @@ public class Day067Test
         public void it_can_find_the_first_split_the_diagram()
         {
             sut.Split(sut.FindNextSplitterFrom(sut.FindStart())).Should()
-                .BeEquivalentTo(new List<Location> { new(2, 6), new(2, 8) });
+                .BeEquivalentTo(new List<Location> { new(1, 6), new(1, 8) });
         }
 
         [Fact]
@@ -78,6 +78,41 @@ public class Day067Test
             numberOfSplits.Should().Be(1600);
         }
     }
+
+    public class Day07Part2(ITestOutputHelper output)
+    {
+        
+        [Fact]
+        public void it_can_simulate_the_test_beams()
+        {
+            var sut = new TachyonManifold("day7_test.txt", output);
+            
+            var numberOfSplits = sut.SimulateQuantumBeams();
+
+            numberOfSplits.Should().Be(40);
+        }
+        
+        [Fact]
+        public void it_can_simulate_the_test_beams_using_optimisation()
+        {
+            var sut = new TachyonManifold("day7_test.txt", output);
+            
+            var numberOfSplits = sut.SimulateQuantumBeamsOptimised();
+
+            numberOfSplits.Should().Be(40);
+        }
+
+        [Fact]
+        public void it_can_simulate_the_beams()
+        {
+            var sut = new TachyonManifold("day7.txt", output);
+            
+            var numberOfSplits = sut.SimulateQuantumBeamsOptimised();
+
+            numberOfSplits.Should().Be(8632253783011L);
+        }
+    }
+
 }
 
 internal class TachyonManifold(List<string> inputLines)
@@ -86,7 +121,7 @@ internal class TachyonManifold(List<string> inputLines)
 
     List<string> diagram =  inputLines.Select(x => x).ToList();
     
-    public TachyonManifold(string fileName, ITestOutputHelper output) : this(FileReader.FromInput(fileName).Lines().ToList())
+    public TachyonManifold(string fileName, ITestOutputHelper output) : this(FileReader.FromInput(fileName).Lines().Filter(x => !x.All(y => y == '.')).ToList())
     {
         this.output = output;
     }
@@ -118,6 +153,11 @@ internal class TachyonManifold(List<string> inputLines)
         return new Location(0, inputLines[0].IndexOf("S", StringComparison.Ordinal));
     }
 
+    public Splitter FindNextSplitter(Splitter lastSplitter)
+    {
+        return new Splitter(FindNextSplitterFrom(lastSplitter.Location));
+    }
+    
     public Location FindNextSplitterFrom(Location findStart)
     {
         var currentLocation = findStart;
@@ -140,10 +180,83 @@ internal class TachyonManifold(List<string> inputLines)
     {
         List<Location> location = new();
         
-        location.Add(new Location(splitter.Line.Value, splitter.Column.Value + 1));
         location.Add(new Location(splitter.Line.Value, splitter.Column.Value - 1));
+        location.Add(new Location(splitter.Line.Value, splitter.Column.Value + 1));
         
         return location;
+    }
+
+    public long SimulateQuantumBeamsOptimised()
+    {
+        var splitterCounts = new Dictionary<Splitter, long>();
+        var firstSplitter = new Splitter(FindNextSplitterFrom(FindStart()));
+
+        return CountTimelines(splitterCounts, firstSplitter);
+    }
+
+    private long CountTimelines(Dictionary<Splitter, long> splitterCounts,  Splitter firstSplitter)
+    {
+        if (splitterCounts.ContainsKey(firstSplitter)) return splitterCounts[firstSplitter];
+        
+        var nextSplitter = FindNextSplitter(firstSplitter);
+        
+        if (nextSplitter.Location == Location.Exited()) return splitterCounts[firstSplitter] = 1;
+
+        long childCount = 0;
+        foreach (var split in  nextSplitter.Splits())
+        {
+            childCount += CountTimelines(splitterCounts, new Splitter(FindNextSplitterFrom(split)));
+        }
+        
+        splitterCounts[nextSplitter] = childCount;
+        return childCount;
+    }
+
+    public int SimulateQuantumBeams()
+    {
+        Location currentBeam = FindStart();
+        
+        HashSet<Location> splitsStillToTrace = new();
+        splitsStillToTrace.Add(Location.Exited());
+        var startTime = DateTime.Now;
+        var timelines = 0;
+        
+        var iteration = 0;
+        
+        while (true)
+        {
+            iteration++;
+            
+            var beamToSplit = FindNextSplitterFrom(currentBeam);
+
+            if (beamToSplit == Location.Exited())
+            {
+                
+                if (splitsStillToTrace.Count == 0)
+                {
+                    break;
+                }
+                
+                timelines++;
+                currentBeam = splitsStillToTrace.Last();
+                splitsStillToTrace.Remove(currentBeam);
+                
+                continue;
+            };
+            
+            var splitBeams = Split(beamToSplit);
+            currentBeam = splitBeams.First();
+
+            splitsStillToTrace.Add(splitBeams.Last());
+        }
+        
+        
+        return timelines;
+    }
+
+    private void OutputDiagram(int iteration, int timelines, DateTime startTime)
+    {
+        OutputDiagram(iteration, 0, timelines, startTime);
     }
 
     public int SimulateBeams()
@@ -209,6 +322,19 @@ internal record Location(Index Line, Index Column)
     public static Location Exited()
     {
         return new Location(int.MaxValue, int.MaxValue);
+    }
+}
+
+internal record Splitter(Location Location)
+{
+    public List<Location> Splits()
+    {
+        List<Location> location = new();
+        
+        location.Add(new Location(Location.Line.Value, Location.Column.Value - 1));
+        location.Add(new Location(Location.Line.Value, Location.Column.Value + 1));
+        
+        return location;
     }
 }
 
