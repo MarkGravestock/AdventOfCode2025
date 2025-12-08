@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 
 namespace MarkGravestock.AdventOfCode2025.Day07;
 
-public class Day067Test
+public class Day07Test
 {
     public class Day07Example
     {
