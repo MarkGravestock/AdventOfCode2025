@@ -143,10 +143,10 @@ public class JunctionBoxConnector
 
     public IEnumerable<Candidate> FindNearest(int count = 10)
     {
-        return FindAllNearest().Take(count);
+        return FindAllByNearest().Take(count);
     }
     
-    public IEnumerable<Candidate> FindAllNearest()
+    public IEnumerable<Candidate> FindAllByNearest()
     {
         var allCombinations = coordinates.SelectMany((first, i) => 
                 coordinates.Skip(i + 1).Select(second => new Candidate(first, second)))
@@ -164,11 +164,6 @@ public class JunctionBoxConnector
     {
         var coordinateInJunction = circuits.Filter(x => x.IsConnectedTo(candidate)).ToList();
 
-        if (coordinateInJunction.Count > 2)
-        {
-            throw new Exception("Too many junctions");    
-        }
-        
         if (coordinateInJunction.Count == 2)
         {
             coordinateInJunction.First().Merge(coordinateInJunction.Last());
@@ -190,28 +185,26 @@ public class JunctionBoxConnector
 
     public Candidate FindFirstCandidateThatFormsASingleCircuitOfSize(int targetCount = 20)
     {
-        var allNearest = FindAllNearest();
+        var allNearest = FindAllByNearest();
         
-        Candidate lastCandidate = null;
-        int count = 0;
+        Candidate? candidateThatMakeCircuit = null;
         
         foreach (var candidate in allNearest)
         { 
-            lastCandidate = candidate;
+            candidateThatMakeCircuit = candidate;
             AddToCircuits(candidate);
-            count++;
             
-            if (candidate.Same(new Candidate(new Coordinate(216,146,977), new Coordinate(117, 168, 530))))
-            {
-                output.WriteLine($"{count} {candidate}");
-            }
-            
-            if (circuits.Count == 1 && circuits.First().Count == targetCount) break;
+            if (IsSingleCircuitConnectingAllJunctionBoxes(targetCount)) break;
         }
 
-        return lastCandidate;
+        return candidateThatMakeCircuit ?? throw new InvalidOperationException("Can't form a single circuit!!!");
     }
-    
+
+    private bool IsSingleCircuitConnectingAllJunctionBoxes(int targetCount)
+    {
+        return circuits.Count == 1 && circuits.First().Count == targetCount;
+    }
+
     public List<Circuit> AddNearestToCircuits(int count = 10)
     {
         var firstTen = FindNearest(count).Take(count);
