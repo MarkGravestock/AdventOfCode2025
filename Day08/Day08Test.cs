@@ -100,17 +100,20 @@ public class Day08Test
     {
         
         [Fact]
-        public void it_can_read_the_junction_box_coordinates()
+        public void it_can_form_all_circuits_for_test()
         {
             var sut = new JunctionBoxConnector("day8_test.txt", output);
-
-            sut.Coordinates().Count().Should().Be(20);
+            var last = sut.FindFirstCandidateThatFormsASingleCircuitOfSize(20);
+            (last.Coordinate1.X * last.Coordinate2.X).Should().Be(25272);
         }
         
 
         [Fact]
-        public void it_can_simulate_the_beams()
+        public void it_can_form_all_circuits()
         {
+            var sut = new JunctionBoxConnector("day8.txt", output);
+            var last = sut.FindFirstCandidateThatFormsASingleCircuitOfSize(1000);
+            (last.Coordinate1.X * last.Coordinate2.X).Should().Be(975931446);
         }
     }
 
@@ -140,13 +143,16 @@ public class JunctionBoxConnector
 
     public IEnumerable<Candidate> FindNearest(int count = 10)
     {
+        return FindAllNearest().Take(count);
+    }
+    
+    public IEnumerable<Candidate> FindAllNearest()
+    {
         var allCombinations = coordinates.SelectMany((first, i) => 
                 coordinates.Skip(i + 1).Select(second => new Candidate(first, second)))
             .ToList();
         
-        var orderedByNearest = allCombinations.OrderBy(x => x.Distance);
-        
-        return orderedByNearest.Take(count);
+        return allCombinations.OrderBy(x => x.Distance);
     }
     
     public Coordinate FindNearest(Coordinate coordinate)
@@ -182,6 +188,30 @@ public class JunctionBoxConnector
         return circuits;
     }
 
+    public Candidate FindFirstCandidateThatFormsASingleCircuitOfSize(int targetCount = 20)
+    {
+        var allNearest = FindAllNearest();
+        
+        Candidate lastCandidate = null;
+        int count = 0;
+        
+        foreach (var candidate in allNearest)
+        { 
+            lastCandidate = candidate;
+            AddToCircuits(candidate);
+            count++;
+            
+            if (candidate.Same(new Candidate(new Coordinate(216,146,977), new Coordinate(117, 168, 530))))
+            {
+                output.WriteLine($"{count} {candidate}");
+            }
+            
+            if (circuits.Count == 1 && circuits.First().Count == targetCount) break;
+        }
+
+        return lastCandidate;
+    }
+    
     public List<Circuit> AddNearestToCircuits(int count = 10)
     {
         var firstTen = FindNearest(count).Take(count);
