@@ -142,17 +142,8 @@ public class RectangleFinder
             .ToList();
 
         var largestToSmallest = allCombinations.OrderByDescending(x => x.Area);
-
-        Rectangle largestThatFits = null;
         
-        foreach (var rectangle in largestToSmallest)
-        {
-            if (IsInBounds(rectangle))
-            {
-                largestThatFits = rectangle;
-                break;
-            }
-        }
+        var largestThatFits =  largestToSmallest.First(x => IsInBounds(x));
         
         GenerateSvg(new []{largestThatFits}.ToList());
 
