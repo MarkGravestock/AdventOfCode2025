@@ -121,7 +121,6 @@ public class RectangleFinder
 
     public bool IsInBounds(Rectangle rectangle)
     {
-
         var x1 = rectangle.Corner1.X.Value;
         var x2 = rectangle.Corner2.X.Value;
         var y1 = rectangle.Corner1.Y.Value;
@@ -168,8 +167,6 @@ public class RectangleFinder
 
 public record Rectangle(Corner Corner1, Corner Corner2)
 {
-    
-    
     public long Area =>  Width * Height;
 
     public long Height => (Math.Abs(Corner1.Y.Value - Corner2.Y.Value) + 1);
