@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using MarkGravestock.AdventOfCode2025.Common;
 using Xunit.Abstractions;
 
 namespace MarkGravestock.AdventOfCode2025.Day12;
