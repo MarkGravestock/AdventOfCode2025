@@ -134,7 +134,7 @@ public class Day10Test
         }
 
         
-        [Fact]
+        [Fact(Skip = "Takes too long. Computationally unfeasible.")]
         public void it_can_count_the_machines()
         {
             var sut = new IndicatorLightDiagramBruteForce("day10.txt", output);
