@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using FluentAssertions;
+﻿using FluentAssertions;
 using MarkGravestock.AdventOfCode2025.Common;
 using Xunit.Abstractions;
 
@@ -196,8 +195,8 @@ public class DevicesPart2
             return mustVisit.IsSubsetOf(requiredVisited) ? 1 : 0;
         }
         
-        var seenList = string.Join(",", requiredVisited.OrderBy(x => x.Name));
-        var key = $"{current.Name}:{seenList}";
+        var requiredVisitedList = string.Join(",", requiredVisited.OrderBy(x => x.Name));
+        var key = $"{current.Name}:{requiredVisitedList}";
 
         if (memo.TryGetValue(key, out var paths)) 
             return paths;
