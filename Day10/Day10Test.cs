@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
+using Google.OrTools.LinearSolver;
 using MarkGravestock.AdventOfCode2025.Common;
-using Microsoft.Z3;
 using Xunit.Abstractions;
 
 namespace MarkGravestock.AdventOfCode2025.Day10;
@@ -205,7 +205,7 @@ public class IndicatorLightDiagramIntegerLinearProgramming
 
     public int FindMininum(int machineIndex)
     {
-        return OperationSolver.FindMinimum(machines[machineIndex].operations, machines[machineIndex].desiredJoltage).Sum();
+        return OperationSolverOrTools.FindMinimum(machines[machineIndex].operations, machines[machineIndex].desiredJoltage).Sum();
     }
 
 
@@ -223,71 +223,46 @@ public class IndicatorLightDiagramIntegerLinearProgramming
     }
 }
 
-public class OperationSolver
+public class OperationSolverOrTools
 {
     public static int[] FindMinimum(int[][] operations, int[] target)
     {
-        using var context = new Context();
-
-        int lowerBound = 0;
-        int upperBound = 10000;
-        int[] bestSolution = null;
-
-        while (lowerBound <= upperBound)
+        var solver = Solver.CreateSolver("SCIP");
+        
+        int numOps = operations.Length;
+        int arraySize = target.Length;
+        
+        Variable[] counts = new Variable[numOps];
+        for (int i = 0; i < numOps; i++)
         {
-            int candidateOperationLimit = (lowerBound + upperBound) / 2;
-            var solution = TrySolveWithOperationLimit(context, operations, target, candidateOperationLimit);
-
-            if (solution != null)
+            counts[i] = solver.MakeIntVar(0, double.PositiveInfinity, $"op{i}");
+        }
+        
+        for (int pos = 0; pos < arraySize; pos++)
+        {
+            Constraint constraint = solver.MakeConstraint(target[pos], target[pos]);
+            for (int op = 0; op < numOps; op++)
             {
-                bestSolution = solution;
-                upperBound = candidateOperationLimit - 1;
-            }
-            else
-            {
-                lowerBound = candidateOperationLimit + 1;
+                constraint.SetCoefficient(counts[op], operations[op][pos]);
             }
         }
-
-        if (bestSolution == null) throw new InvalidOperationException("No solution found");
-
-        return bestSolution;
+        
+        Objective objective = solver.Objective();
+        for (int i = 0; i < numOps; i++)
+        {
+            objective.SetCoefficient(counts[i], 1);
+        }
+        
+        objective.SetMinimization();
+        
+        if (solver.Solve() != Solver.ResultStatus.OPTIMAL)
+        {
+            throw new Exception("No solution found");
+        }
+        
+        return counts.Select(c => (int)Math.Round(c.SolutionValue())).ToArray();
     }
 
-    private static int[] TrySolveWithOperationLimit(Context context, int[][] operations, int[] target, int maximumOperations)
-    {
-        using var solver = context.MkSolver();
-
-        int numberOfOperations = operations.Length;
-        int targetArraySize = target.Length;
-
-        var operationCounts = new IntExpr[numberOfOperations];
-        for (int i = 0; i < numberOfOperations; i++)
-        {
-            operationCounts[i] = context.MkIntConst($"op{i}");
-            solver.Add(context.MkGe(operationCounts[i], context.MkInt(0)));
-        }
-
-        for (int position = 0; position < targetArraySize; position++)
-        {
-            var positionTerms = new ArithExpr[numberOfOperations];
-            for (int operation = 0; operation < numberOfOperations; operation++)
-            {
-                positionTerms[operation] = context.MkMul(context.MkInt(operations[operation][position]), operationCounts[operation]);
-            }
-            solver.Add(context.MkEq(context.MkAdd(positionTerms), context.MkInt(target[position])));
-        }
-
-        solver.Add(context.MkLe(context.MkAdd(operationCounts), context.MkInt(maximumOperations)));
-
-        if (solver.Check() == Status.SATISFIABLE)
-        {
-            var model = solver.Model;
-            return operationCounts.Select(operationCount => int.Parse(model.Evaluate(operationCount, true).ToString())).ToArray();
-        }
-
-        return null;
-    }
 }
 
 public class IndicatorLightDiagram

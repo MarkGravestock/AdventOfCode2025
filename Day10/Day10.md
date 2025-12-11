@@ -1,17 +1,19 @@
-﻿### Day 10
+﻿## Day 10
 
-#### Key Algorithms
+### Key Algorithms
 
-##### Part 1
+#### Part 1
 
 - Brute Force approach
 
-##### Part 2
+#### Part 2
 
-- Integer Linear Programming approach to satisy the constraints
-- Microsoft Z3 used as the solver
+- Integer Linear Programming approach to satisfy the constraints
+- Google OR-Tools used as the solver
 
-#### Notes
+[Google OR Tools](https://developers.google.com/optimization)
+
+### Notes
 
 Need to explore ILP as optimisation technique eg:
 
@@ -21,5 +23,5 @@ Need to explore ILP as optimisation technique eg:
 
 Compare with 
 - [Timefold](https://docs.timefold.ai/timefold-solver/latest/optimization-algorithms/overview)
-- [Google OR Tools](https://developers.google.com/optimization)
+- [Microsoft Z3](https://microsoft.github.io/z3guide/docs/optimization/asmallcasestudy)
 
