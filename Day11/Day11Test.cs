@@ -64,8 +64,7 @@ public class Devices
 {
     private readonly ITestOutputHelper output;
     private readonly Dictionary<string, Device> devices = new();
-    
-    private readonly HashSet<Device> visited = new();
+
     private readonly HashSet<Device> pathSet = new();
     private readonly List<Device> currentPath = new();
     private readonly List<List<Device>> allPaths = new();
