@@ -153,12 +153,12 @@ public abstract class DialBase(int startingAt)
         var clicks = int.Parse(rotation.Substring(1));
         var direction = rotation[0];
         
-        UpdateDialSate(direction, clicks);
+        UpdateDialState(direction, clicks);
 
         return this;
     }
 
-    protected abstract void UpdateDialSate(char direction, int clicks);
+    protected abstract void UpdateDialState(char direction, int clicks);
 
     public int CurrentPosition()
     {
@@ -173,7 +173,7 @@ public abstract class DialBase(int startingAt)
 
 public class Dial(int startingAt) : DialBase(startingAt)
 {
-    protected override void UpdateDialSate(char direction, int clicks)
+    protected override void UpdateDialState(char direction, int clicks)
     {
         if (direction == 'L')
         {
@@ -192,7 +192,7 @@ public class Dial(int startingAt) : DialBase(startingAt)
 
 public class DialPart2(int startingAt) : DialBase(startingAt)
 {
-    protected override void UpdateDialSate(char direction, int clicks)
+    protected override void UpdateDialState(char direction, int clicks)
     {
         int numberOfPasses = clicks / 100;
         

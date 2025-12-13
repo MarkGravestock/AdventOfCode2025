@@ -4,14 +4,6 @@ using Xunit.Abstractions;
 
 namespace MarkGravestock.AdventOfCode2025.Day12;
 
-public enum Rotation
-{
-    Degrees0,
-    Degrees90,
-    Degrees180,
-    Degrees270
-}
-
 public class Day12Test
 {
     public class Day12Example
@@ -26,14 +18,14 @@ public class Day12Test
         [Fact]
         public void it_can_load_the_presents()
         {
-            sut.Shapes.Count.Should().Be(6);
+            sut.Presents.Count.Should().Be(6);
         }
 
         [Fact]
         public void it_loads_presents_with_correct_counts()
         {
-            sut.Shapes[0].Count.Should().Be(7);
-            sut.Shapes[5].Count.Should().Be(7);
+            sut.Presents[0].Count.Should().Be(7);
+            sut.Presents[5].Count.Should().Be(7);
         }
 
         [Fact]
@@ -61,7 +53,7 @@ public class Day12Test
         [Fact]
         public void it_can_rotate_a_present()
         {
-            var present = sut.Shapes[0];
+            var present = sut.Presents[0];
 
             var rotated90 = present.Rotate(Rotation.Degrees90);
             rotated90[0, 0].Should().BeTrue();
@@ -100,7 +92,7 @@ public class Day12Test
         [Fact]
         public void it_can_get_all_rotations()
         {
-            var present = sut.Shapes[0];
+            var present = sut.Presents[0];
             var allRotations = present.AllRotations().ToList();
 
             allRotations.Count.Should().Be(4);
@@ -110,7 +102,7 @@ public class Day12Test
         public void it_can_check_if_present_fits_in_region()
         {
             var region = new Region(5, 5);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             region.CanFit(present, new Location(0, 0)).Should().BeTrue();
             region.CanFit(present, new Location(2, 2)).Should().BeTrue();
@@ -121,7 +113,7 @@ public class Day12Test
         public void it_detects_when_present_exceeds_bounds()
         {
             var region = new Region(4, 4);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             region.CanFit(present, new Location(2, 0)).Should().BeFalse();
             region.CanFit(present, new Location(0, 2)).Should().BeFalse();
@@ -131,7 +123,7 @@ public class Day12Test
         public void it_detects_when_cells_are_not_available()
         {
             var region = new Region(5, 5);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             region[0, 0] = true;
 
@@ -143,7 +135,7 @@ public class Day12Test
         public void it_can_place_a_present_in_region()
         {
             var region = new Region(5, 5);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             region.Place(present, new Location(0, 0));
 
@@ -162,7 +154,7 @@ public class Day12Test
         public void it_prevents_placing_present_when_cannot_fit()
         {
             var region = new Region(4, 4);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             var act = () => region.Place(present, new Location(2, 0));
 
@@ -173,7 +165,7 @@ public class Day12Test
         public void it_prevents_overlapping_presents()
         {
             var region = new Region(5, 5);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             region.Place(present, new Location(0, 0));
 
@@ -186,7 +178,7 @@ public class Day12Test
         public void it_can_remove_a_present_from_region()
         {
             var region = new Region(5, 5);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             region.Place(present, new Location(0, 0));
             region.Remove(present, new Location(0, 0));
@@ -204,7 +196,7 @@ public class Day12Test
         public void it_can_place_after_removing()
         {
             var region = new Region(5, 5);
-            var present = sut.Shapes[4];
+            var present = sut.Presents[4];
 
             region.Place(present, new Location(0, 0));
             region.Remove(present, new Location(0, 0));
@@ -217,9 +209,9 @@ public class Day12Test
         {
             var requirement = sut.Requirements[0];
 
-            var shapeList = requirement.ExpandToPresentList();
+            var presentList = requirement.ExpandToPresentList();
 
-            shapeList.Should().Equal(4, 4);
+            presentList.Should().Equal(4, 4);
         }
 
         [Fact]
@@ -227,9 +219,9 @@ public class Day12Test
         {
             var requirement = sut.Requirements[2];
 
-            var shapeList = requirement.ExpandToPresentList();
+            var presentList = requirement.ExpandToPresentList();
 
-            shapeList.Should().Equal(0, 2, 4, 4, 4, 5, 5);
+            presentList.Should().Equal(0, 2, 4, 4, 4, 5, 5);
         }
 
         [Fact]
@@ -280,31 +272,20 @@ public class Day12Test
             sut.Solvable().Should().Be(448);
         }
     }
+}
 
-    public class Day11Part2(ITestOutputHelper output)
-    {
-        [Fact]
-        public void it_can_count_the_machines_in_examples()
-        {
-            var sut = new PresentPacker("day12_test.txt", output);
-            sut.Should().NotBe(null);
-        }
-
-
-        [Fact]
-        public void it_can_count_the_machines()
-        {
-            var sut = new PresentPacker("day12.txt", output);
-            sut.Should().NotBe(null);
-        }
-    }
-
+public enum Rotation
+{
+    Degrees0,
+    Degrees90,
+    Degrees180,
+    Degrees270
 }
 
 public class PresentPacker
 {
     private readonly ITestOutputHelper output;
-    private readonly Dictionary<int, Present> shapes;
+    private readonly Dictionary<int, Present> presents;
     private readonly List<Requirement> requirements;
 
     private int maxIterations = 0;
@@ -315,7 +296,7 @@ public class PresentPacker
 
         var lines = File.ReadAllLines($"./Input/{fileName}");
 
-        shapes = lines
+        presents = lines
             .Select((line, index) => (line: line.Trim(), index))
             .Where(x => x.line.EndsWith(':') && int.TryParse(x.line.TrimEnd(':'), out _))
             .Select(x => new
@@ -343,7 +324,7 @@ public class PresentPacker
             .ToList();
     }
 
-    public Dictionary<int, Present> Shapes => shapes;
+    public Dictionary<int, Present> Presents => presents;
     public List<Requirement> Requirements => requirements;
 
     public int Solvable()
@@ -355,7 +336,7 @@ public class PresentPacker
     {
         var shapeList = requirement.ExpandToPresentList();
         var shapesToPlace = shapeList
-            .Select(id => shapes[id])
+            .Select(id => presents[id])
             .OrderByDescending(shape => shape.Count)
             .ToList();
 
